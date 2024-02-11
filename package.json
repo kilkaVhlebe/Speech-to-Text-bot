@@ -1,0 +1,28 @@
+{
+  "name": "ts_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc & node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@picovoice/leopard-node": "^2.0.2",
+    "@types/node": "^20.11.17",
+    "dotenv": "^16.4.2",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^2.6.6",
+    "node-telegram-bot-api": "^0.63.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.11",
+    "@types/node-telegram-bot-api": "^0.64.2",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2"
+  }
+}
