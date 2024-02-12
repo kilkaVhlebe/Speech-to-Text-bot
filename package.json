@@ -11,14 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/opus": "github:discordjs/opus",
     "@picovoice/leopard-node": "^2.0.2",
     "@types/node": "^20.11.17",
-    "discord.js": "^14.14.1",
     "dotenv": "^16.4.2",
     "fs": "^0.0.1-security",
     "gtts": "^0.2.1",
     "node-fetch": "^2.6.6",
     "node-telegram-bot-api": "^0.63.0",
+    "opusscript": "^0.1.1",
     "path": "^0.12.7"
   },
   "devDependencies": {

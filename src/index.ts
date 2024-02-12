@@ -3,11 +3,20 @@ import MessageHandler from "./Message.Handler";
 import "dotenv/config"
 
 const token = process.env.TELEGRAM_TOKEN;
-if(typeof token !== "string") throw new Error("TOKEN PARSING ERROR")
+if(!token) throw new Error("token is undefined")
+
+
 const bot = new TelegramBot(token, {polling: true});
-
-
 const Handler = new MessageHandler()
+
+
+
+
+bot.onText(/\/start/,(message) => {
+
+    Handler.StartCommand(message)
+
+})
 
 bot.on("voice",(message) =>{
 
@@ -17,10 +26,10 @@ bot.on("voice",(message) =>{
 
 bot.on("text", (message, metadata) => {
 
-    if(!message.text || message.text === "/start"){
-        throw new Error("Undefined")
+    if(!message.text){
+        throw new Error("Message has an empty body")
     }
-    Handler.TextToSpeech(message, metadata)
+    Handler.TextToSpeech(message)
 
 })
 
