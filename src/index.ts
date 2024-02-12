@@ -15,3 +15,12 @@ bot.on("voice",(message) =>{
 
 })
 
+bot.on("text", (message, metadata) => {
+
+    if(!message.text || message.text === "/start"){
+        throw new Error("Undefined")
+    }
+    Handler.TextToSpeech(message, metadata)
+
+})
+
