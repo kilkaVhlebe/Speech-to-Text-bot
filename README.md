@@ -29,6 +29,6 @@ SpeechToText
 
 ``
 TextToSpeech
-``- Send any texted message to bot and get it voiced(use gtts module).
+``- Send any text message to bot and get it voiced(use gtts module).
 
 
