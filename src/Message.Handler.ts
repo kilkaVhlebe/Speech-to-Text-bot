@@ -3,79 +3,40 @@ import fs from "fs"
 import nodeFetch from "node-fetch"
 import {Leopard} from "@picovoice/leopard-node";
 // @ts-ignore
-import gTTS from "gtts";
-import "dotenv/config"
+import GTTS from "gtts";
+import {accessKey, token} from "./index";
+import {Description, downloadPath, downloadURL, uploadPath} from "./constants";
+import {MessageController} from "./Message.Controller";
 
-
-const token = process.env.TELEGRAM_TOKEN;
-const accessKey = process.env.ACCESS_KEY;
-
+console.log(token + " " + accessKey)
 if(!token || !accessKey) throw new Error("ENV PARSING ERROR")
-
 
 const handle = new Leopard(accessKey);
 const bot = new TelegramBot(token);
+const Controller = new MessageController()
 
-const Description = "Hi! I'm @SachipegaBot for Text-To-Speech and Speech-To-Text!\n" +
-    "If you want use Speech-To-Text just send me an a voice message(not file!)\n" +
-    "If you want use Text-To-Speech send me any text message and get it Voiced!\n" +
-    "IMPORTANT: only English language supported!"
 
-export default class MessageHandler {
+export class MessageHandler {
 
-    StartCommand(receivedMessage: TelegramBot.Message) {
-        bot.sendMessage(receivedMessage.chat.id, Description)
-            .then().catch((err) => {
-                throw new Error(err.toString())
-        })
+    async StartCommand(receivedMessage: TelegramBot.Message) {
+       await Controller.startCommand({chatId: receivedMessage.chat.id, message: Description})
     }
 
-    SpeechToText(receivedMessage: TelegramBot.Message) {
-
-        const id = receivedMessage.voice?.file_id
-
-        if (!id) throw new Error("fileId is undefined")
-
-        bot.getFile(id).then(response => {
-
-            nodeFetch(`https://api.telegram.org/file/bot${token}/${response.file_path}`)
-                .then(data => {
-
-                    const file = fs.createWriteStream("./files/file.ogg");
-
-                    if (!data.body) throw new Error("File object body is null or undefined")
-
-                    data.body.pipe(file).on("close", () => {
-
-                        const result = handle.processFile("./files/file.ogg");
-
-                        bot.sendMessage(receivedMessage.chat.id, result.transcript)
-                            .then().catch((err) => {
-                            throw new Error(err.toString())
-                        })
-                    })
-                })
+    async SpeechToText(receivedMessage: TelegramBot.Message) {
+        const fileData = await bot.getFile(<string>receivedMessage.voice?.file_id)
+        const file = await nodeFetch(downloadURL(fileData.file_path))
+        const filePath = downloadPath
+        file.body.pipe(fs.createWriteStream(filePath)).on("close", async () => {
+            const result = handle.processFile(filePath)
+            await Controller.speechToText({chatId: receivedMessage.chat.id, message: result.transcript})
         })
-
     }
 
     TextToSpeech(receivedMessage: TelegramBot.Message) {
-
-        if(receivedMessage.text !== "/start") {
-
-            const gtts = new gTTS(receivedMessage.text, 'en');
-            //@ts-ignore
-            gtts.save('./files/Voice.ogg', (err: string) => {
-                if (err) {
-                    throw new Error(err);
-                }
-
-                bot.sendVoice(receivedMessage.chat.id, "./files/Voice.ogg")
-                    .then().catch((err) => {
-                    throw new Error(err.toString())
-                })
-
-            })
-        }
+        const gtts = new GTTS(receivedMessage.text, 'en');
+        gtts.save(uploadPath, async (err: string) => {
+            if (err) throw new Error(err)
+            await Controller.textToSpeech({chatId: receivedMessage.chat.id, message: uploadPath})
+        })
     }
 }
